@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<input type="text" id="UserId" placeholder="User ID">
+<button onclick="sendUserId()">Send User Id Manually</button>
+<br>
+<br>
+
+<!-- Personal chat -->
+<input type="text" id="SenderId" placeholder="Sender ID">
+<input type="text" id="RecipientId" placeholder="Recipient ID">
+<button onclick="getPreviousConversations()">Get previous messages</button>
+
+<br>
+<br>
+<input type="text" id="Message" placeholder="Message">
+<button onclick="sendPrivatelMessage()">Send Personal Message</button>
+
+<!-- Group chat -->
+<br>
+<br>
+<div>
+  <label for="groupMessage">Message:</label>
+  <input type="text" id="groupMessage" placeholder="Enter your message">
+</div>
+<br>
+<div>
+  <label for="senderId">Sender Id:</label>
+  <input type="text" id="senderId" placeholder="Sender Id">
+</div>
+<br>
+<div>
+  <button onclick="sendGroupMessage()">Send Group Message</button>
+</div>
+<br>
+<div>
+  <button id="joinGroupButton" onclick="joinGroup()">Join Group</button>
+</div>
+
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+      console.log('Socket ID:', socket.id);
+    });
+
+    socket.on('group_message', (data) => {
+      const { senderId, message } = data;
+      console.log('Received group message:', message, 'Sent by:', senderId);
+    });
+
+    socket.on('user_joined_group', (message) => {
+      console.log(message);
+    });
+
+    function joinGroup() {
+      socket.emit('join_group');
+    }
+
+    socket.on('previous_conversations', (conversations) => {
+      conversations.forEach(conversation => {
+        console.log('Received conversation:', conversation);
+      });
+      // for (let i = 0; i < conversations.length; i++) {
+      //   const conversation = conversations[i];
+      //   console.log('Received conversation:', conversation);
+      // }
+    });
+
+    socket.on('private_message', (data) => {
+      const { senderId, message } = data;
+      console.log('Recieved message:', message, 'Sent by:', senderId);
+    });
+
+    function sendUserId() {
+      const userId = document.getElementById('UserId').value;
+      socket.emit('get_user_id', { userId });
+    }
+
+    function getPreviousConversations() {
+      const senderId = document.getElementById('SenderId').value;;
+      const recipientId = document.getElementById('RecipientId').value;
+      socket.emit('get_conversation', { senderId, recipientId });
+    }
+
+    function sendPrivatelMessage() {
+      const senderId = document.getElementById('SenderId').value;;
+      const recipientId = document.getElementById('RecipientId').value;;
+      const message = document.getElementById('Message').value;;
+      socket.emit('private_message', { senderId, recipientId, message });
+    }
+
+    function sendGroupMessage() {
+      const senderId = document.getElementById('senderId').value;
+      const message = document.getElementById('groupMessage').value;
+      socket.emit('group_message', { senderId, message });
+    }
+  </script>
+</body>
+
+</html>
