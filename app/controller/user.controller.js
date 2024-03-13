@@ -67,7 +67,30 @@ exports.findUser = (data) => {
 //   });
 // };
 
-
+exports.findUserByIdForIndividual = (data) => {
+  return new Promise((resolve, reject) => {
+    // users.findAll({ where: { id: data }, attributes: { exclude: ["created_at", "updated_at", "is_testdata", "is_delete"] } }).then((result) => {
+    users.findAll({ where: { id: data, is_delete: 0, is_testdata: 1}, attributes: { exclude: ["created_at", "updated_at", "is_testdata"] } }).then((result) => {
+      try {
+        if (result.length > 0) {
+          resolve({
+            status: 1,
+            message: "data found",
+            data: result,
+          });
+        } else {
+          resolve(0);
+          resolve({ status: 2, message: "No data found" });
+        }
+      } catch (err) {
+        resolve({
+          status: 0,
+          message: "Error occurred while fetching User",
+        });
+      }
+    });
+  });
+};
 exports.findUserById = (data) => {
   return new Promise((resolve, reject) => {
     // users.findAll({ where: { id: data }, attributes: { exclude: ["created_at", "updated_at", "is_testdata", "is_delete"] } }).then((result) => {

@@ -10,7 +10,7 @@ io.on("connection", (socket) => {
   
     socket.on('get_user_id', async (param) => {
       userId = param.userId;
-      const userExists = await userController.findUserById(userId);
+      const userExists = await userController.findUserByIdForIndividual(userId);
       if(userExists.status === 1){
         userSocketMap.set(userId, socket.id);
         console.log("============")
