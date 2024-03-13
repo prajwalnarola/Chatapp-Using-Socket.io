@@ -67,16 +67,16 @@ exports.register = async (req, res) => {
       const data = await users.create(create_user);
       if (data) {
         res
-        .status(responseCode.OK)
-        .send(
-          responseObj.successObject(
-            constants.MSG.SUCCESSFULLYREGISTER,
-          )
-        );
+          .status(responseCode.OK)
+          .send(
+            responseObj.successObject(
+              constants.MSG.SUCCESSFULLYREGISTER,
+            )
+          );
 
-        } else {
-          res.send({ message: constants.MSG.SOMETHINKWROUNGUSERDATA });
-        }
+      } else {
+        res.send({ message: constants.MSG.SOMETHINKWROUNGUSERDATA });
+      }
     }
   } catch (err) {
     if (err?.message) {
@@ -133,7 +133,7 @@ exports.login = async (req, res) => {
       console.log("USER ID :", user_email.data[0].id);
 
       if (functions.verifyPassword(req.body?.password, user_email.data[0]?.password) && req.body.email.toLowerCase() == user_email.data[0].email.toLowerCase()) {
-        
+
         const jwt_data = { id: user_email.data[0].id, email: user_email.data[0].email, uuid: user_email.data[0].uuid };
         const token = jwt.sign(jwt_data, process.env.ACCESS_TOKEN_SECRET_KEY);
 
@@ -181,6 +181,61 @@ exports.login = async (req, res) => {
     }
   }
 };
+
+exports.userListing = async (req, res) => {
+  try {
+    if (!req.decoded) {
+      res.status(responseCode.UNAUTHORIZEDREQUEST).send(responseObj.failObject(constants.MSG.UNAUTHORIZEDREQUEST));
+      return;
+    }
+
+    var errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(responseCode.BADREQUEST).send(responseObj.failObject(errors?.errors[0]?.msg));
+      return;
+    }
+
+    if (!req.headers['device_token'] || !req.headers['device_type'] || !req.headers['is_testdata']) {
+      res.status(responseCode.BADREQUEST).send(responseObj.failObject(constants.MSG.HEADERSAREREQUIRED));
+      return;
+    }
+
+    const decoded = req?.decoded;
+
+    const requestData = {
+      id: decoded?.id,
+      is_testdata: req.headers['is_testdata'],
+    }
+
+    const user_data = await userControl.findUserById(requestData);
+
+    if (user_data?.status == 1) {
+      const usersData = await users.findAll({
+        where: {
+          is_delete: 0,
+          is_testdata: requestData.is_testdata
+        },
+        attributes: {
+          exclude: ["password", "created_at", "updated_at", "is_testdata", "is_delete"]
+        }
+      });
+
+      if (usersData.length > 0) {
+
+          res.status(responseCode.OK).send(responseObj.successObject(null, usersData));
+
+      } else {
+        res.status(responseCode.BADREQUEST).send(responseObj.failObject(constants.MSG.SOMETHINKWROUNG));
+      }
+
+    } else {
+      res.status(responseCode.BADREQUEST).send(responseObj.failObject(constants.MSG.NOUSER));
+    }
+
+  } catch (err) {
+    res.status(responseCode.BADREQUEST).send(responseObj.failObject(err?.message, err));
+  }
+}
 
 exports.logout = async (req, res) => {
   try {

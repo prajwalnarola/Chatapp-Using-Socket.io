@@ -13,6 +13,8 @@ Router.post("/register", [HelperFunctions.verifyToken, validator.validateRegiste
 
 Router.post("/login", [HelperFunctions.verifyToken, validator.validateLogin], authController.login);
 
+Router.get('/user-listing', authMiddleware, authController.userListing);
+
 Router.post('/logout', authMiddleware, authController.logout);
 
 module.exports = Router;
