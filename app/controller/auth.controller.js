@@ -288,3 +288,17 @@ exports.logout = async (req, res) => {
     res.status(responseCode.BADREQUEST).send(responseObj.failObject(err?.message, err));
   }
 }
+
+const { sendPushNotification } = require("../routes/pushNotificationService.routes");
+
+exports.sendNotification = async (req, res) => {
+  const { token, title, body } = req.body;
+
+  try {
+    await sendPushNotification(token, title, body);
+    res.status(responseCode.OK).send(responseObj.successObject("Notification sent successfully"));
+    // res.status(200).send();
+  } catch (error) {
+    res.status(500).send("Failed to send notification");
+  }
+}

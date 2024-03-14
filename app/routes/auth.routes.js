@@ -17,5 +17,7 @@ Router.get('/user-listing', authMiddleware, authController.userListing);
 
 Router.post('/logout', authMiddleware, authController.logout);
 
+Router.post("/send-notification", authController.sendNotification);
+
 module.exports = Router;
 

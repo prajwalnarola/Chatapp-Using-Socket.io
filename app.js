@@ -3,7 +3,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const path = require("path");
-
+const admin = require("firebase-admin");
 
 const app = express();
 const server = http.createServer(app);
@@ -27,6 +27,7 @@ app.get("/", (req, res) => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", require("./app/routes"));
+
 
 server.listen(4000, () => {
   console.log("Listning on port: 4000");
