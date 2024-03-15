@@ -11,6 +11,7 @@ const functions = require("../utils/helperFunctions");
 const responseCode = require("../utils/responseStatus");
 const responseObj = require("../utils/responseObjects");
 const constants = require("../utils/constants");
+const { sendPushNotification } = require("../routes/pushNotificationService.routes");
 
 
 exports.refreshToken = async (req, res) => {
@@ -289,8 +290,6 @@ exports.logout = async (req, res) => {
   }
 }
 
-const { sendPushNotification } = require("../routes/pushNotificationService.routes");
-
 exports.sendNotification = async (req, res) => {
   const { token, title, body } = req.body;
 
@@ -302,3 +301,5 @@ exports.sendNotification = async (req, res) => {
     res.status(500).send("Failed to send notification");
   }
 }
+
+
